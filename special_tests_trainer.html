@@ -19,6 +19,11 @@ h1 { text-align: center; }
 .quiz-question h3 { margin-top: 0; }
 .quiz-options label { display: block; margin-bottom: 5px; cursor: pointer; }
 .quiz-answer { margin-top: 5px; font-weight: bold; }
+
+/* Search field styles */
+#search { margin-top: 10px; }
+#search input { padding: 5px; margin-left: 5px; }
+#searchResults { margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -33,6 +38,11 @@ h1 { text-align: center; }
         <label for="numTests">Number of tests (3–10):</label>
         <input type="number" id="numTests" min="3" max="10" value="5">
     </div>
+    <div id="search">
+        <label for="searchInput">Search test:</label>
+        <input type="text" id="searchInput" placeholder="Enter test name">
+    </div>
+    <div id="searchResults"></div>
     <div class="category-select">
         <strong>Select categories:</strong><br>
         <label><input type="checkbox" name="category" value="Head and Neck" checked> Head and Neck</label>
@@ -148,6 +158,38 @@ function generateQuiz(list) {
             radios.forEach(r => r.disabled = true);
         });
         container.appendChild(qDiv);
+    });
+}
+
+// Search functionality
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        // Clear previous results and details
+        searchResults.innerHTML = '';
+        if (!query) return;
+        const matches = tests.filter(t => t.name.toLowerCase().includes(query));
+        matches.forEach(t => {
+            const btn = document.createElement('button');
+            btn.className = 'button';
+            btn.style.width = '100%';
+            btn.textContent = t.name + ' (' + t.category + ')';
+            btn.addEventListener('click', () => {
+                const nextSibling = btn.nextElementSibling;
+                if (nextSibling && nextSibling.classList.contains('testDetails')) {
+                    nextSibling.remove();
+                    return;
+                }
+                const detailDiv = document.createElement('div');
+                detailDiv.className = 'testDetails';
+                detailDiv.innerHTML = '<strong>Goal:</strong> ' + t.goal + '<br><strong>Procedure:</strong> ' + t.procedure + '<br><strong>Positive sign:</strong> ' + t.positive;
+                btn.insertAdjacentElement('afterend', detailDiv);
+                detailDiv.style.display = 'block';
+            });
+            searchResults.appendChild(btn);
+        });
     });
 }
 </script>
